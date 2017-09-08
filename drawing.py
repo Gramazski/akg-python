@@ -59,9 +59,9 @@ class ApplicationRenderer:
 
         self.draw_square(x1, y1, x2, y2, x3, y3, x4, y4)
 
-        k = 5
+        k = 1
         n = 5
-        for i in range(0, 10):
+        for i in range(0, 20):
             mu = math.tan(k * math.pi / (4 * n)) / (math.tan(k * math.pi / (4 * n)) + 1)
             old_x1 = x1
             old_y1 = y1
