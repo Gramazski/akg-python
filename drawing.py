@@ -4,6 +4,7 @@ import math
 
 
 class ApplicationRenderer:
+    LINE_COLOR = sdl2.ext.Color(255, 0, 0, 0)
     CLEAR_COLOR = sdl2.ext.Color(255, 255, 255, 0)
     AXIS_COLOR = sdl2.ext.Color(0, 0, 0, 255)
 
@@ -25,74 +26,62 @@ class ApplicationRenderer:
         self.x_scale = width / float(self.native_width)
         self.y_scale = height / float(self.native_height)
 
-    def render(self, drawer):
+    def render(self):
         self.clear()
+        """
         center_to_angle_length = 283
         angle = 0
 
         for i in range(0, 30):
-            drawer.draw(center_to_angle_length, angle)
+            self.draw_tracery(center_to_angle_length, angle)
             center_to_angle_length *= math.sin(math.pi / 3)
-            angle += math.pi / 19
-
+            angle += math.pi / 60
+        """
+        self.draw_tracery()
         self.update()
 
     def clear(self):
         self.renderer.clear(ApplicationRenderer.CLEAR_COLOR)
 
-    def draw_line(self, x1, y1, x2, y2, color):
-        drawer = Drawer(self)
-        drawer.draw_line(int(self.x_scale * (x1 + self.left_offset)),
-                         int(self.y_scale * (-y1 + self.top_offset)),
-                         int(self.x_scale * (x2 + self.left_offset)),
-                         int(self.y_scale * (-y2 + self.top_offset)),
-                         color)
+    def draw_tracery(self):
+        x_center = 400
+        y_center = 300
+        side_length = 400
 
-    def draw_pixel(self, x, y, color):
-        self.renderer.draw_point(points=[int(x), int(y)], color=color)
+        x1 = x_center - side_length / 2
+        y1 = y_center - side_length / 2
+        x2 = x_center + side_length / 2
+        y2 = y_center - side_length / 2
+        x3 = x_center + side_length / 2
+        y3 = y_center + side_length / 2
+        x4 = x_center - side_length / 2
+        y4 = y_center + side_length / 2
 
-    def draw_axis(self):
-        self.draw_line(-self.left_offset,
-                       0,
-                       self.native_width - self.left_offset,
-                       0,
-                       ApplicationRenderer.AXIS_COLOR)
-        self.draw_line(0,
-                       -self.top_offset,
-                       0,
-                       self.native_height - self.top_offset,
-                       ApplicationRenderer.AXIS_COLOR)
+        self.draw_square(x1, y1, x2, y2, x3, y3, x4, y4)
 
-    def update(self):
-        self.renderer.present()
+        k = 5
+        n = 5
+        for i in range(0, 10):
+            mu = math.tan(k * math.pi / (4 * n)) / (math.tan(k * math.pi / (4 * n)) + 1)
+            old_x1 = x1
+            old_y1 = y1
 
-
-class Drawer:
-    LINE_COLOR = sdl2.ext.Color(255, 0, 0, 0)
-
-    def __init__(self, renderer):
-        self.renderer = renderer
+            x1 = (1 - mu) * x1 + mu * x2
+            y1 = (1 - mu) * y1 + mu * y2
+            x2 = (1 - mu) * x2 + mu * x3
+            y2 = (1 - mu) * y2 + mu * y3
+            x3 = (1 - mu) * x3 + mu * x4
+            y3 = (1 - mu) * y3 + mu * y4
+            x4 = (1 - mu) * x4 + mu * old_x1
+            y4 = (1 - mu) * y4 + mu * old_y1
+            self.draw_square(x1, y1, x2, y2, x3, y3, x4, y4)
+            n += 1
 
     def draw_square(self, x1, y1, x2, y2, x3, y3, x4, y4):
         self.draw_line(x1, y1, x2, y2, self.LINE_COLOR)
         self.draw_line(x2, y2, x3, y3, self.LINE_COLOR)
         self.draw_line(x3, y3, x4, y4, self.LINE_COLOR)
         self.draw_line(x4, y4, x1, y1, self.LINE_COLOR)
-
-    def draw(self, center_to_angle_length, angle):
-        x0 = 200
-        y0 = 200
-
-        x1 = x0 + center_to_angle_length * math.cos(angle + 1 * math.pi / 4)
-        y1 = y0 + center_to_angle_length * math.sin(angle + 1 * math.pi / 4)
-        x2 = x0 + center_to_angle_length * math.cos(angle + 3 * math.pi / 4)
-        y2 = y0 + center_to_angle_length * math.sin(angle + 3 * math.pi / 4)
-        x3 = x0 + center_to_angle_length * math.cos(angle + 5 * math.pi / 4)
-        y3 = y0 + center_to_angle_length * math.sin(angle + 5 * math.pi / 4)
-        x4 = x0 + center_to_angle_length * math.cos(angle + 7 * math.pi / 4)
-        y4 = y0 + center_to_angle_length * math.sin(angle + 7 * math.pi / 4)
-
-        self.draw_square(x1, y1, x2, y2, x3, y3, x4, y4)
 
     def draw_line(self, x1, y1, x2, y2, color):
 
@@ -106,7 +95,7 @@ class Drawer:
             d1 = 2 * dy
             d2 = (dy - dx) * 2
 
-            self.renderer.draw_pixel(x1, y1, color)
+            self.draw_pixel(x1, y1, color)
             x = x1 + sx
             y = y1
             i = 1
@@ -117,7 +106,7 @@ class Drawer:
                 else:
                     d += d1
 
-                self.renderer.draw_pixel(x, y, color)
+                self.draw_pixel(x, y, color)
 
                 i += 1
                 x += sx
@@ -126,7 +115,7 @@ class Drawer:
             d1 = dx * 2
             d2 = (dx - dy) * 2
 
-            self.renderer.draw_pixel(x1, y1, color)
+            self.draw_pixel(x1, y1, color)
             x = x1
             y = y1 + sy
             i = 1
@@ -137,8 +126,32 @@ class Drawer:
                 else:
                     d += d1
 
-                self.renderer.draw_pixel(x, y, color)
+                self.draw_pixel(x, y, color)
 
                 i += 1
                 y += sy
-        return 0
+
+    def draw_pixel(self, x, y, color):
+        self.renderer.draw_point(points=[int(x), int(y)], color=color)
+
+    def update(self):
+        self.renderer.present()
+
+
+"""
+    def draw_tracery(self, center_to_angle_length, angle):
+
+        x0 = 200
+        y0 = 200
+
+        x1 = x0 + center_to_angle_length * math.cos(angle + 1 * math.pi / 4)
+        y1 = y0 + center_to_angle_length * math.sin(angle + 1 * math.pi / 4)
+        x2 = x0 + center_to_angle_length * math.cos(angle + 3 * math.pi / 4)
+        y2 = y0 + center_to_angle_length * math.sin(angle + 3 * math.pi / 4)
+        x3 = x0 + center_to_angle_length * math.cos(angle + 5 * math.pi / 4)
+        y3 = y0 + center_to_angle_length * math.sin(angle + 5 * math.pi / 4)
+        x4 = x0 + center_to_angle_length * math.cos(angle + 7 * math.pi / 4)
+        y4 = y0 + center_to_angle_length * math.sin(angle + 7 * math.pi / 4)
+
+        self.draw_square(x1, y1, x2, y2, x3, y3, x4, y4)
+        """

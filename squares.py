@@ -16,7 +16,6 @@ def run():
                                                config.WINDOW_WIDTH / 5,
                                                config.WINDOW_HEIGHT / 2)
 
-    drawer = drawing.Drawer(application_renderer)
     running = True
     while running:
         events = sdl2.ext.get_events()
@@ -28,7 +27,7 @@ def run():
                 if event.window.event == sdl2.SDL_WINDOWEVENT_RESIZED:
                     application_renderer.update_coordinates(event.window.data1,
                                                             event.window.data2)
-        application_renderer.render(drawer)
+        application_renderer.render()
         sdl2.SDL_Delay(100)
     sdl2.ext.quit()
     return 0
